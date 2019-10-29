@@ -1,11 +1,9 @@
- ![icon](etc/logo.png)
+ ![icon](assets/logo.png)
 
 Omni-Notes
 ==========
 
 ![SLicense](https://img.shields.io/badge/License-GPLv3-red.svg)
-[![Stories in Ready](https://badge.waffle.io/federicoiosue/Omni-Notes.png?label=ready&title=Ready)](https://waffle.io/federicoiosue/Omni-Notes)
-[![Stories in In Progress](https://badge.waffle.io/federicoiosue/Omni-Notes.png?label=In%20Progress&title=InProgress)](https://waffle.io/federicoiosue/Omni-Notes)
 [![Crowdin](https://d322cqt584bo4o.cloudfront.net/omni-notes/localized.png)](https://crowdin.com/project/omni-notes)
 [![Build Status](https://travis-ci.org/federicoiosue/Omni-Notes.svg?branch=develop)](https://travis-ci.org/federicoiosue/Omni-Notes)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8ade707d00ef468fa79d3f6b622444b5)](https://www.codacy.com/app/federico-iosue/Omni-Notes?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=federicoiosue/Omni-Notes&amp;utm_campaign=Badge_Grade)
@@ -15,9 +13,9 @@ Note taking <b>open-source</b> application aimed to have both a <b>simple interf
 
 The project was inspired by the absence of such applications compatible with old phones and old versions of Android. It aims to provide an attractive look and follow the most recent design guidelines of the Google operating system.
 
-**Follow the developments and post your comments and advice on Google+ Beta Community at http://goo.gl/eF6qqF**
+**Follow the developments and post your comments and advice on Facebook Community at https://www.facebook.com/OmniNotes**
 
-*Help to keep translations updated is always welcome, if you want give a hand checkout the translation project at [Crowdin][2].*
+*Help to keep translations updated is always welcome, if you want give a hand checkout the translation project on **https://translate.omninotes.app.** *
 
 <a href="https://f-droid.org/repository/browse/?fdid=it.feio.android.omninotes.foss" target="_blank">
 <img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="90"/></a>
@@ -45,23 +43,23 @@ Currently the following functions are implemented:
 Further developments will include:
 
 * Notes sychronization
-* Web interface to manage notes
+* Web interface to manage notes ([stub project](https://github.com/federicoiosue/omni-notes-desktop))
 
 You can find a complete changelog inside the application settings menu!
 
-If you need some help on how to use the application you'll find everything you need in the [Help Online](etc/help/help.md) section.
+If you need some help on how to use the application you'll find everything you need in the [Help Online](assets/help/help.md) section.
 
-![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/etc/play_store_pics/02.png)
-![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/etc/play_store_pics/03.png)
-![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/etc/play_store_pics/04.png)
-![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/etc/play_store_pics/05.png)
-![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/etc/play_store_pics/06.png)
-![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/etc/play_store_pics/07.png)
-![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/etc/play_store_pics/08.png)
-![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/etc/play_store_pics/09.png)
-![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/etc/play_store_pics/10.png)
-![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/etc/play_store_pics/11.png)
-![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/etc/play_store_pics/12.png)
+![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/assets/play_store_pics/02.png)
+![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/assets/play_store_pics/03.png)
+![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/assets/play_store_pics/04.png)
+![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/assets/play_store_pics/05.png)
+![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/assets/play_store_pics/06.png)
+![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/assets/play_store_pics/07.png)
+![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/assets/play_store_pics/08.png)
+![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/assets/play_store_pics/09.png)
+![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/assets/play_store_pics/10.png)
+![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/assets/play_store_pics/11.png)
+![](https://raw.githubusercontent.com/federicoiosue/Omni-Notes/develop/assets/play_store_pics/12.png)
 
 ## User guide
 
@@ -88,19 +86,26 @@ There are many features/improvements that are not on **my** roadmap but someone 
 
 Feel free to add yourself to [contributors.md](https://github.com/federicoiosue/Omni-Notes/blob/develop/contributors.md) file.
 
-**Don't forget to contribute to original code! Don't be selfish or lazy!**
+### New feature or improvements contributions
 
-### Test code contributions
+This kind of contributions **must** have screenshots or screencast as demonstration of the new additions.
+
+### Code style
+
+If you plan to manipulate the code then you'll have to do it by following a [specific code style](https://gist.github.com/federicoiosue/dee53e882b3c70d544f8608769eb02fc).
+Also pay attention if you're using any plugin that automatically formats/cleans/rearrange your code and set it to only change that code that you touched and not the whole files.
+
+### Test your code contributions!
 
 All code changes and additions **must** be tested.
-See the [related section](#test) about this.
+See the [related section](#test) for more informations or this two pull requests comments: [one](https://github.com/federicoiosue/Omni-Notes/pull/646#pullrequestreview-187973443) and [two](https://github.com/federicoiosue/Omni-Notes/pull/683#issuecomment-506206689)
 
-### Fork project
+### Forking project
 
 When forking the project you'll have to modify some files that are strictly dependent from my own development / build / third-party-services environment. Files that need some attention are the following:
 
-- *gradle.properties*: this is overridden by another file with the same name inside the *omniNotes* module. You can do the same or leave as it is, any missing property will let the app gracefully fallback on a default behavior.
-- *.travis.yml*: if you use [TravisCI](https://travis-ci.org/) as continuous integration platform and a SonarQUBE instance for code quality analysis you'll have to modify this file according to your needs.
+  - *gradle.properties*: this is overridden by another file with the same name inside the *omniNotes* module. You can do the same or leave as it is, any missing property will let the app gracefully fallback on a default behavior.
+  - *.travis.yml*: if you use [TravisCI](https://travis-ci.org/) as continuous integration platform and a SonarQUBE instance for code quality analysis you'll have to modify this file according to your needs.
 
 ## Code quality
 
@@ -146,7 +151,7 @@ They're all listed into the [build.gradle](https://github.com/federicoiosue/Omni
 ## Developed with love and passion by
 
 
-* Federico Iosue - [Website](http://www.iosue.it/federico)
+* Federico Iosue - [Website](https://federico.iosue.it)
 * [Other contributors](https://github.com/federicoiosue/Omni-Notes/blob/master/https://github.com/federicoiosue/Omni-Notes/blob/master/CONTRIBUTORS.md)
 
 
@@ -154,7 +159,7 @@ They're all listed into the [build.gradle](https://github.com/federicoiosue/Omni
 ## License
 
 
-    Copyright 2013-2018 Federico Iosue
+    Copyright 2013-2019 Federico Iosue
     
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -169,6 +174,3 @@ They're all listed into the [build.gradle](https://github.com/federicoiosue/Omni
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-[2]: https://crowdin.net/project/omni-notes/
-[2]: https://crowdin.net/project/omni-notes/
