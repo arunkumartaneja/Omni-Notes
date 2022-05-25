@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2019 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,27 +17,24 @@
 
 package it.feio.android.omninotes.utils;
 
-import android.support.test.filters.Suppress;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.FlakyTest;
 import it.feio.android.omninotes.BaseAndroidTestCase;
 import it.feio.android.omninotes.OmniNotes;
 import java.io.IOException;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-
-@Ignore("Unreliable Genymotion emulator results")
+@FlakyTest(detail = "'Grpc failed' error on emulator. Not reliable")
 @RunWith(AndroidJUnit4.class)
 public class GeocodeHelperTest extends BaseAndroidTestCase {
 
   @Test
-  @Suppress
-  public void testGetAddressFromCoordinates () throws IOException {
+  public void testGetAddressFromCoordinates() throws IOException {
     if (ConnectionManager.internetAvailable(OmniNotes.getAppContext())) {
-      Double LAT = 43.799328;
-      Double LON = 11.171552;
+      double LAT = 43.799328;
+      double LON = 11.171552;
       String address = GeocodeHelper.getAddressFromCoordinates(OmniNotes.getAppContext(), LAT, LON);
       Assert.assertTrue(address.length() > 0);
     }
