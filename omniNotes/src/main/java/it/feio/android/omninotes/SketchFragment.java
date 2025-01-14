@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@
  */
 
 package it.feio.android.omninotes;
+
+import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -147,11 +149,11 @@ public class SketchFragment extends Fragment implements OnDrawChangedListener {
 
     // Inflate the popup_layout.XML
     LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(
-        AppCompatActivity.LAYOUT_INFLATER_SERVICE);
+        LAYOUT_INFLATER_SERVICE);
     popupLayout = inflater.inflate(R.layout.popup_sketch_stroke, null);
     // And the one for eraser
     LayoutInflater inflaterEraser = (LayoutInflater) getActivity().getSystemService(
-        AppCompatActivity.LAYOUT_INFLATER_SERVICE);
+        LAYOUT_INFLATER_SERVICE);
     popupEraserLayout = inflaterEraser.inflate(R.layout.popup_sketch_eraser, null);
 
     // Actual stroke shape size is retrieved

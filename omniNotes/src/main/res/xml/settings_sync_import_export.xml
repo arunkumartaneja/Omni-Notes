@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+  ~ Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -30,9 +30,9 @@
     app:iconSpaceReserved="false" />
 
   <Preference
-    android:key="settings_import_data_legacy"
-    android:summary="@string/settings_import_legacy_summary"
-    android:title="@string/settings_import_legacy"
+    android:key="settings_change_backup_folder"
+    android:title="@string/settings_change_backup_folder"
+    app:isPreferenceVisible="false"
     app:iconSpaceReserved="false" />
 
   <!--<Preference-->

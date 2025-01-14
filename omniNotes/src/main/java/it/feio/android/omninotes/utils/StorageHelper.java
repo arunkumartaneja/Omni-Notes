@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,13 @@
  */
 package it.feio.android.omninotes.utils;
 
+import static android.os.Environment.DIRECTORY_DOWNLOADS;
+import static android.widget.Toast.LENGTH_SHORT;
+import static it.feio.android.omninotes.utils.ConstantsBase.MIME_TYPE_AUDIO;
+import static it.feio.android.omninotes.utils.ConstantsBase.MIME_TYPE_FILES;
+import static it.feio.android.omninotes.utils.ConstantsBase.MIME_TYPE_IMAGE;
+import static it.feio.android.omninotes.utils.ConstantsBase.MIME_TYPE_VIDEO;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -26,6 +33,7 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
+import androidx.annotation.Nullable;
 import it.feio.android.omninotes.OmniNotes;
 import it.feio.android.omninotes.R;
 import it.feio.android.omninotes.exceptions.unchecked.ExternalDirectoryCreationException;
@@ -77,10 +85,7 @@ public class StorageHelper {
 
 
   public static String getStorageDir() {
-    // return Environment.getExternalStorageDirectory() + File.separator +
-    // Constants.TAG + File.separator;
-    return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        .toString();
+    return Environment.getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS).toString();
   }
 
 
@@ -111,7 +116,7 @@ public class StorageHelper {
 
     if (!checkStorage()) {
       Toast.makeText(mContext, mContext.getString(R.string.storage_not_available),
-          Toast.LENGTH_SHORT).show();
+          LENGTH_SHORT).show();
       return null;
     }
     File file = createNewAttachmentFile(mContext, extension);
@@ -153,6 +158,18 @@ public class StorageHelper {
     return file;
   }
 
+  public static boolean copyFile(Context context, Uri fileUri, Uri targetUri) {
+    ContentResolver content = context.getContentResolver();
+    try (var is = content.openInputStream(fileUri);
+        var os = content.openOutputStream(targetUri)) {
+      IOUtils.copy(is, os);
+      return true;
+    } catch (IOException e) {
+      LogDelegate.e("Error copying file", e);
+      return false;
+    }
+  }
+
   public static void copyFile(File source, File destination, boolean failOnError) throws IOException {
     try {
       FileUtils.copyFile(source, destination);
@@ -184,18 +201,16 @@ public class StorageHelper {
     // Checks for external storage availability
     if (!checkStorage()) {
       Toast.makeText(mContext, mContext.getString(R.string.storage_not_available),
-          Toast.LENGTH_SHORT).show();
+          LENGTH_SHORT).show();
       return false;
     }
     File file = new File(mContext.getExternalFilesDir(null), name);
     return file.delete();
   }
 
-
   public static boolean delete(Context mContext, String path) {
     if (!checkStorage()) {
-      Toast.makeText(mContext, mContext.getString(R.string.storage_not_available),
-          Toast.LENGTH_SHORT).show();
+      Toast.makeText(mContext, mContext.getString(R.string.storage_not_available), LENGTH_SHORT).show();
       return false;
     }
     try {
@@ -206,7 +221,6 @@ public class StorageHelper {
     }
     return true;
   }
-
 
   public static String getRealPathFromURI(Context mContext, Uri contentUri) {
     String[] proj = {MediaStore.Images.Media.DATA};
@@ -283,26 +297,6 @@ public class StorageHelper {
   public static File getExternalStoragePublicDir() {
     return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
         + File.separator + Constants.EXTERNAL_STORAGE_FOLDER + File.separator);
-  }
-
-  public static File getOrCreateBackupDir(String backupName) {
-    File backupDir = new File(getOrCreateExternalStoragePublicDir(), backupName);
-    if (!backupDir.exists() && backupDir.mkdirs()) {
-      createNoMediaFile(backupDir);
-    }
-    return backupDir;
-  }
-
-
-  private static void createNoMediaFile(File folder) {
-    try {
-      boolean created = new File(folder, ".nomedia").createNewFile();
-      if (!created) {
-        LogDelegate.w("File .nomedia already existing into " + folder.getAbsolutePath());
-      }
-    } catch (IOException e) {
-      LogDelegate.e("Error creating .nomedia file into backup folder");
-    }
   }
 
 
@@ -389,24 +383,23 @@ public class StorageHelper {
    */
   public static String getMimeTypeInternal(Context mContext, Uri uri) {
     String mimeType = getMimeType(mContext, uri);
-    mimeType = getMimeTypeInternal(mContext, mimeType);
-    return mimeType;
+    return getMimeTypeInternal(mimeType);
   }
 
 
   /**
    * Retrieves mime-type between the ones managed by application from given string
    */
-  public static String getMimeTypeInternal(Context mContext, String mimeType) {
+  public static String getMimeTypeInternal(String mimeType) {
     if (mimeType != null) {
       if (mimeType.contains("image/")) {
-        mimeType = Constants.MIME_TYPE_IMAGE;
+        mimeType = MIME_TYPE_IMAGE;
       } else if (mimeType.contains("audio/")) {
-        mimeType = Constants.MIME_TYPE_AUDIO;
+        mimeType = MIME_TYPE_AUDIO;
       } else if (mimeType.contains("video/")) {
-        mimeType = Constants.MIME_TYPE_VIDEO;
+        mimeType = MIME_TYPE_VIDEO;
       } else {
-        mimeType = Constants.MIME_TYPE_FILES;
+        mimeType = MIME_TYPE_FILES;
       }
     }
     return mimeType;
@@ -416,19 +409,18 @@ public class StorageHelper {
   /**
    * Creates a new attachment file copying data from source file
    */
-  public static Attachment createAttachmentFromUri(Context mContext, Uri uri) {
+  public static @Nullable Attachment createAttachmentFromUri(Context mContext, Uri uri) {
     return createAttachmentFromUri(mContext, uri, false);
   }
 
 
   /**
-   * Creates a fiile to be used as attachment.
+   * Creates a file to be used as attachment.
    */
-  public static Attachment createAttachmentFromUri(Context mContext, Uri uri, boolean moveSource) {
+  public static @Nullable Attachment createAttachmentFromUri(Context mContext, Uri uri, boolean moveSource) {
     String name = FileHelper.getNameFromUri(mContext, uri);
     String extension = FileHelper.getFileExtension(FileHelper.getNameFromUri(mContext, uri))
-        .toLowerCase(
-            Locale.getDefault());
+        .toLowerCase(Locale.getDefault());
     File f;
     if (moveSource) {
       f = createNewAttachmentFile(mContext, extension);

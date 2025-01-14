@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,7 +105,6 @@ public class BaseUnitTest {
     LocaleList localeList = mock(LocaleList.class);
     when(configuration.getLocales()).thenReturn(localeList);
     when(configuration.getLocales().get(0)).thenReturn(Locale.ITALY);
-//    doReturn(Locale.ITALY).when(configuration.locale);
     return configuration;
   }
 

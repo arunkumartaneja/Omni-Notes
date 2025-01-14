@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ public interface WordCounter {
   int countChars(Note note);
 
   default String sanitizeTextForWordsAndCharsCount(Note note, String field) {
-    if (note.isChecklist()) {
+    if (Boolean.TRUE.equals(note.isChecklist())) {
       String regex =
           "(" + Pattern.quote(it.feio.android.checklistview.interfaces.Constants.CHECKED_SYM) + "|"
               + Pattern.quote(it.feio.android.checklistview.interfaces.Constants.UNCHECKED_SYM)

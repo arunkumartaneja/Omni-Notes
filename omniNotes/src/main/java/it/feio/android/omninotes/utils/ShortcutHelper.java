@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 
 package it.feio.android.omninotes.utils;
 
+import static it.feio.android.omninotes.helpers.IntentHelper.immutablePendingIntentFlag;
 import static it.feio.android.omninotes.utils.ConstantsBase.ACTION_SHORTCUT;
 import static it.feio.android.omninotes.utils.ConstantsBase.INTENT_KEY;
 import static it.feio.android.omninotes.utils.ConstantsBase.PREF_PRETTIFIED_DATES;
@@ -30,11 +31,11 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import com.pixplicity.easyprefs.library.Prefs;
 import it.feio.android.omninotes.MainActivity;
 import it.feio.android.omninotes.R;
+import it.feio.android.omninotes.helpers.BuildHelper;
 import it.feio.android.omninotes.helpers.date.DateHelper;
 import it.feio.android.omninotes.models.Note;
 import lombok.SneakyThrows;
@@ -53,7 +54,7 @@ public class ShortcutHelper {
                 .getCreation(),
             Prefs.getBoolean(PREF_PRETTIFIED_DATES, true));
 
-    if (Build.VERSION.SDK_INT < 26) {
+    if (BuildHelper.isBelow(VERSION_CODES.O)) {
       createShortcutPreOreo(context, note, shortcutTitle);
     } else {
       createShortcutPostOreo(context, note, shortcutTitle);
@@ -81,7 +82,7 @@ public class ShortcutHelper {
           .createShortcutResultIntent(pinShortcutInfo);
       //Get notified when a shortcut is pinned successfully//
       PendingIntent successCallback = PendingIntent
-          .getBroadcast(context, 0, pinnedShortcutCallbackIntent, 0);
+          .getBroadcast(context, 0, pinnedShortcutCallbackIntent, immutablePendingIntentFlag(0));
       shortcutManager.requestPinShortcut(pinShortcutInfo, successCallback.getIntentSender()
       );
     }
@@ -117,7 +118,7 @@ public class ShortcutHelper {
    * Removes note shortcut from home launcher
    */
   public static void removeShortcut(Context context, Note note) {
-    if (Build.VERSION.SDK_INT < 26) {
+    if (BuildHelper.isBelow(VERSION_CODES.O)) {
       removeShortcutPreOreo(context, note);
     } else {
       removeShortcutPostOreo(context, note);

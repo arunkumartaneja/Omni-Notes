@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+  ~ Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -17,12 +17,102 @@
 <changelog bulletedList="true">
 
   <changelogversion
-    changeDate="Apr 21, 2022"
+    changeDate="Mar 8, 2024"
+    versionName="6.3.2">
+    <changelogtext>[b]Happy Women Day!![/b]</changelogtext>
+    <changelogtext>[i]Improved![/i] Ask for camera permission at runtime (thanks to [a href='https://github.com/pratistha-05']Pratistha Sinha[/a] and [a href='https://github.com/akashs056']Akash Subramanian[/a])</changelogtext>
+    <changelogtext>[i]Improved![/i] When trying to pin a note without notifications permissions enabled a message will be shown</changelogtext>
+    <changelogtext>[i]Improved![/i] Updated Gradle build tools to 8.3.0</changelogtext>
+    <changelogtext>[u]Fix[/u] Protected notes are no more searchable nor their tags (from content) will appear anywhere content's secrecy (thanks to [a href='https://github.com/XYIheng']Yiheng Xiong[/a])</changelogtext>
+  </changelogversion>
+
+  <changelogversion
+    changeDate="Dec 16, 2023"
+    versionName="6.3.1">
+    <changelogtext>[i]Improved![/i] Updated F-Droid resources and translations</changelogtext>
+    <changelogtext>[u]Fix[/u] Dynamic left menu items counting fixed (thanks to [a href='https://github.com/XYIheng']Yiheng Xiong[/a])</changelogtext>
+    <changelogtext>[u]Fix[/u] Correct dialog text shown on category deletion (thanks to [a href='https://github.com/XYIheng']Yiheng Xiong[/a])</changelogtext>
+    <changelogtext>[u]Fix[/u] Notes updated state correctly reflected into the notes list in real time (thanks to [a href='https://github.com/XYIheng']Yiheng Xiong[/a])</changelogtext>
+  </changelogversion>
+
+  <changelogversion
+    changeDate="Dec 3, 2023"
+    versionName="6.3.0">
+    <changelogtext>[b]New![/b] Targeting Android 13 API with improved performances and security updates</changelogtext>
+    <changelogtext>[b]New![/b] Telegram channel (removed Facebook, never used...)</changelogtext>
+    <changelogtext>[b]New![/b] Adaptive and monochrome icons (thanks to [a href='https://github.com/rec0de']Rec0de[/a])</changelogtext>
+    <changelogtext>[b]New![/b] Context menu option when some text is selected in other apps (thanks to [a href='https://github.com/rahulpower2012']Rahul[/a])</changelogtext>
+    <changelogtext>[i]Improved![/i] Managed runtime notifications permission on Tiramisu and above</changelogtext>
+    <changelogtext>[u]Fix[/u] Backups removal</changelogtext>
+    <changelogtext>[u]Fix[/u] Security improvements</changelogtext>
+    <changelogtext>[u]Fix[/u] Committed trash/archive movements on search action to keep data consistency (thanks to [a href='https://github.com/XYIheng']Yiheng Xiong[/a])</changelogtext>
+    <changelogtext>[u]Fix[/u] Tags and categories related issues (thanks to [a href='https://github.com/XYIheng']Yiheng Xiong[/a])</changelogtext>
+    <changelogtext>[u]Fix[/u] More bugs fixed (thanks to [a href='https://github.com/federicoiosue/Omni-Notes/issues?q=is%3Aissue+author%3AXYIheng+is%3Aclosed']Yiheng Xiong[/a])</changelogtext>
+  </changelogversion>
+
+  <changelogversion
+    changeDate="Jun 3, 2023"
+    versionName="6.2.10">
+    <changelogtext>[u]Fix[/u] Broken backup restore on Android version previous than 8</changelogtext>
+  </changelogversion>
+
+  <changelogversion
+    changeDate="Jun 1, 2023"
+    versionName="6.2.9">
+    <changelogtext>[u]Fix[/u] Broken F-Droid version build</changelogtext>
+  </changelogversion>
+
+  <changelogversion
+    changeDate="May 31, 2023"
+    versionName="6.2.8">
+    <changelogtext>[i]Improved![/i] Better GPS errors management (thanks [a href='https://github.com/Dries04']Dries04[/a] </changelogtext>
+    <changelogtext>[u]Fix[/u] Disappearing main menu items from latest version</changelogtext>
+  </changelogversion>
+
+  <changelogversion
+    changeDate="May 31, 2023"
+    versionName="6.2.7">
+    <changelogtext>[u]Fix[/u] Security path traversal vulnerability</changelogtext>
+    <changelogtext>[u]Fix[/u] Attachments' count in statistics (thanks to S.Vago)</changelogtext>
+  </changelogversion>
+
+  <changelogversion
+    changeDate="Apr 30, 2023"
+    versionName="6.2.6">
+    <changelogtext>[i]Improved![/i] Reduced required permissions and removed some legacy code</changelogtext>
+    <changelogtext>[u]Fix[/u] Backup folder management</changelogtext>
+  </changelogversion>
+
+  <changelogversion
+    changeDate="Apr 20, 2023"
+    versionName="6.2.5">
+    <changelogtext>[u]Fix[/u] Bulk attachments modification in database to fix backup</changelogtext>
+  </changelogversion>
+
+  <changelogversion
+    changeDate="Apr 18, 2023"
+    versionName="6.2.4">
+    <changelogtext>[u]Fix[/u] Take camera picture action from some devices</changelogtext>
+  </changelogversion>
+
+  <changelogversion
+    changeDate="Apr 16, 2023"
+    versionName="6.2.3">
+    <changelogtext>[b]New![/b] Backup folder is modifiable on Android Oreo and higher</changelogtext>
+    <changelogtext>[u]Fix[/u] Backups management for installations upgraded from version 6.1.0</changelogtext>
+  </changelogversion>
+
+  <changelogversion
+    changeDate="Mar 24, 2023"
     versionName="6.2.0">
-    <changelogtext>[b]New![/b] Updated to Android 11 to get latest fixes and improvements
+    <changelogtext>[b]New![/b] Updated to Android 12 to get latest fixes and improvements
       <![CDATA[[b][font color=red>IMPORTANT:[/font][/b] This will require to move your old backups to the new directory]]>
     </changelogtext>
+    <changelogtext>[b]New![/b] Open source transparent crashes reporting available on acra.omninotes.app (user: guest, pass: guest)</changelogtext>
     <changelogtext>[b]New![/b] Removed all analytics</changelogtext>
+    <changelogtext>[b]New![/b] Changelog shown on every app's update</changelogtext>
+    <changelogtext>[i]Improved![/i] Password is required when importing backups containing protected notes</changelogtext>
+    <changelogtext>[u]Fix[/u] Backups restoration on Android 12+</changelogtext>
     <changelogtext>[u]Fix[/u] Backup import/export notifications improvements</changelogtext>
   </changelogversion>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,18 +17,25 @@
 
 package it.feio.android.omninotes.utils;
 
+import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
+import static android.app.PendingIntent.FLAG_NO_CREATE;
+import static android.widget.Toast.LENGTH_LONG;
+import static it.feio.android.omninotes.helpers.IntentHelper.immutablePendingIntentFlag;
 import static it.feio.android.omninotes.utils.ConstantsBase.INTENT_NOTE;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Handler;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.widget.Toast;
 import it.feio.android.omninotes.OmniNotes;
 import it.feio.android.omninotes.R;
 import it.feio.android.omninotes.helpers.date.DateHelper;
+import it.feio.android.omninotes.helpers.notifications.NotificationsHelper;
 import it.feio.android.omninotes.models.Note;
 import it.feio.android.omninotes.receiver.AlarmReceiver;
 import it.feio.android.omninotes.utils.date.DateUtils;
@@ -49,14 +56,30 @@ public class ReminderHelper {
 
   public static void addReminder(Context context, Note note, long reminder) {
     if (DateUtils.isFuture(reminder)) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // Android 12 (API 31) and above
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+        if (!alarmManager.canScheduleExactAlarms()) {
+          Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+          context.startActivity(intent);
+          return;
+        }
+      }
+
       Intent intent = new Intent(context, AlarmReceiver.class);
       intent.putExtra(INTENT_NOTE, ParcelableUtil.marshall(note));
-      PendingIntent sender = PendingIntent.getBroadcast(context, getRequestCode(note), intent,
-          PendingIntent.FLAG_CANCEL_CURRENT);
+      PendingIntent sender = PendingIntent.getBroadcast(
+          context,
+          getRequestCode(note),
+          intent,
+          immutablePendingIntentFlag(PendingIntent.FLAG_CANCEL_CURRENT)
+      );
+
       AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
       am.setExact(AlarmManager.RTC_WAKEUP, reminder, sender);
     }
   }
+
 
   /**
    * Checks if exists any reminder for given note
@@ -64,7 +87,7 @@ public class ReminderHelper {
   public static boolean checkReminder(Context context, Note note) {
     return
         PendingIntent.getBroadcast(context, getRequestCode(note), new Intent(context, AlarmReceiver
-            .class), PendingIntent.FLAG_NO_CREATE) != null;
+            .class), immutablePendingIntentFlag(FLAG_NO_CREATE)) != null;
   }
 
   static int getRequestCode(Note note) {
@@ -77,7 +100,8 @@ public class ReminderHelper {
     if (!TextUtils.isEmpty(note.getAlarm())) {
       AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
       Intent intent = new Intent(context, AlarmReceiver.class);
-      PendingIntent p = PendingIntent.getBroadcast(context, getRequestCode(note), intent, 0);
+      PendingIntent p = PendingIntent.getBroadcast(context, getRequestCode(note), intent,
+          immutablePendingIntentFlag(0));
       am.cancel(p);
       p.cancel();
     }
@@ -85,13 +109,17 @@ public class ReminderHelper {
 
   public static void showReminderMessage(String reminderString) {
     if (reminderString != null) {
+      var context = OmniNotes.getAppContext();
       long reminder = Long.parseLong(reminderString);
       if (reminder > Calendar.getInstance().getTimeInMillis()) {
         new Handler(OmniNotes.getAppContext().getMainLooper()).post(() ->
-            Toast.makeText(OmniNotes.getAppContext(),
-                OmniNotes.getAppContext().getString(R.string.alarm_set_on) + " " + DateHelper
-                    .getDateTimeShort
-                        (OmniNotes.getAppContext(), reminder), Toast.LENGTH_LONG).show());
+            Toast.makeText(context,
+                context.getString(R.string.alarm_set_on) + " " + DateHelper
+                    .getDateTimeShort(context, reminder), LENGTH_LONG).show());
+
+        if (!new NotificationsHelper(context).checkNotificationsEnabled(context)) {
+          Toast.makeText(context, context.getString(R.string.denied_notifications_permission), LENGTH_LONG).show();
+        }
       }
     }
   }

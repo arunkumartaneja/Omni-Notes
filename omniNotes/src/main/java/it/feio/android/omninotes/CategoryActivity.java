@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,15 @@ import static it.feio.android.omninotes.utils.ConstantsBase.INTENT_CATEGORY;
 import static it.feio.android.omninotes.utils.ConstantsBase.PREF_NAVIGATION;
 import static java.lang.Integer.parseInt;
 
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
+import android.view.WindowManager;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -36,9 +41,10 @@ import it.feio.android.omninotes.databinding.ActivityCategoryBinding;
 import it.feio.android.omninotes.db.DbHelper;
 import it.feio.android.omninotes.helpers.LogDelegate;
 import it.feio.android.omninotes.models.Category;
+import it.feio.android.omninotes.utils.Display;
+import it.feio.android.omninotes.utils.RandomUtils;
 import it.feio.android.simplegallery.util.BitmapUtils;
 import java.util.Calendar;
-import java.util.Random;
 
 
 public class CategoryActivity extends AppCompatActivity implements
@@ -46,7 +52,7 @@ public class CategoryActivity extends AppCompatActivity implements
 
   private ActivityCategoryBinding binding;
 
-  Category category;
+  private Category category;
   private int selectedColor;
 
   @Override
@@ -57,7 +63,9 @@ public class CategoryActivity extends AppCompatActivity implements
     View view = binding.getRoot();
     setContentView(view);
 
-    category = getIntent().getParcelableExtra(INTENT_CATEGORY);
+    category = savedInstanceState != null
+        ? savedInstanceState.getParcelable("category")
+        : getIntent().getParcelableExtra(INTENT_CATEGORY);
 
     if (category == null) {
       LogDelegate.d("Adding new category");
@@ -68,15 +76,30 @@ public class CategoryActivity extends AppCompatActivity implements
     }
     selectedColor = parseInt(category.getColor());
     populateViews();
+    resetWindowSize();
+  }
+
+  @Override
+  public void onSaveInstanceState(Bundle outState) {
+    outState.putParcelable("category", category);
+    super.onSaveInstanceState(outState);
+  }
+
+  private void resetWindowSize() {
+    Point screen = Display.getScreenDimensions(this);
+    Window window = getWindow();
+    WindowManager.LayoutParams params = window.getAttributes();
+    params.width = (int) (screen.x * 0.6);
+    params.height = LayoutParams.WRAP_CONTENT;
+    window.setAttributes(params);
   }
 
   private int getRandomPaletteColor() {
     int[] paletteArray = getResources().getIntArray(R.array.material_colors);
-    return paletteArray[new Random().nextInt((paletteArray.length))];
+    return paletteArray[RandomUtils.getRandomInt(paletteArray.length)];
   }
 
   public void showColorChooserCustomColors() {
-
     new ColorChooserDialog.Builder(this, R.string.colors)
         .dynamicButtonColor(false)
         .preselect(selectedColor)
@@ -143,10 +166,8 @@ public class CategoryActivity extends AppCompatActivity implements
   }
 
   public void deleteCategory() {
-
-    new MaterialDialog.Builder(this)
+    var dialogBuilder = new MaterialDialog.Builder(this)
         .title(R.string.delete_unused_category_confirmation)
-        .content(R.string.delete_category_confirmation)
         .positiveText(R.string.confirm)
         .positiveColorRes(R.color.colorAccent)
         .onPositive((dialog, which) -> {
@@ -156,16 +177,20 @@ public class CategoryActivity extends AppCompatActivity implements
           if (String.valueOf(category.getId()).equals(navigation)) {
             Prefs.edit().putString(PREF_NAVIGATION, navNotes).apply();
           }
-          // Removes category and edit notes associated with it
-          DbHelper db = DbHelper.getInstance();
-          db.deleteCategory(category);
+          DbHelper.getInstance().deleteCategory(category);
 
           EventBus.getDefault().post(new CategoriesUpdatedEvent());
           BaseActivity.notifyAppWidgets(OmniNotes.getAppContext());
 
           setResult(RESULT_FIRST_USER);
           finish();
-        }).build().show();
+        });
+
+    if (category.getCount() > 0) {
+      dialogBuilder.content(R.string.delete_category_confirmation);
+    }
+
+    dialogBuilder.build().show();
   }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import it.feio.android.omninotes.R;
 import it.feio.android.omninotes.models.Note;
-import java.io.IOException;
+import it.feio.android.omninotes.testutils.NoRealDeviceTest;
 import java.util.List;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Test;
@@ -138,6 +138,7 @@ public class MrJingleLifecycleTest extends BaseEspressoTest {
   }
 
    @Test
+   @NoRealDeviceTest
    public void mrJingle_displayedOnArchiveWhenEmptiedBySwiping() {
       createTestNote("title", "content", 0);
       List<Note> notes = dbHelper.getAllNotes(false);
@@ -147,7 +148,7 @@ public class MrJingleLifecycleTest extends BaseEspressoTest {
 
       onView(withId(R.id.list)).perform(
               RecyclerViewActions.actionOnItemAtPosition(0, new GeneralSwipeAction(
-                      Swipe.SLOW, GeneralLocation.BOTTOM_RIGHT, GeneralLocation.BOTTOM_LEFT,
+                      Swipe.FAST, GeneralLocation.CENTER, GeneralLocation.CENTER_LEFT,
                       Press.FINGER)));
 
       onView(allOf(withId(R.id.empty_list), withText(R.string.no_items_in_list),

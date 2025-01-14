@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,6 @@ import android.content.Intent;
 import android.content.res.TypedArray;
 import android.os.AsyncTask;
 import androidx.fragment.app.Fragment;
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import com.pixplicity.easyprefs.library.Prefs;
 import de.greenrobot.event.EventBus;
 import it.feio.android.omninotes.MainActivity;
@@ -43,18 +41,14 @@ import java.util.List;
 
 public class MainMenuTask extends AsyncTask<Void, Void, List<NavigationItem>> {
 
-  private final WeakReference<Fragment> mFragmentWeakReference;
-  private final MainActivity mainActivity;
-  @BindView(R.id.drawer_nav_list)
-  NonScrollableListView mDrawerList;
-  @BindView(R.id.drawer_tag_list)
-  NonScrollableListView mDrawerCategoriesList;
+  private final WeakReference<Fragment> fragmentWeakReference;
+  private final WeakReference<MainActivity> mainActivity;
+  private NonScrollableListView navDrawer;
 
 
-  public MainMenuTask(Fragment mFragment) {
-    mFragmentWeakReference = new WeakReference<>(mFragment);
-    this.mainActivity = (MainActivity) mFragment.getActivity();
-    ButterKnife.bind(this, mFragment.getView());
+  public MainMenuTask(Fragment fragment) {
+    fragmentWeakReference = new WeakReference<>(fragment);
+    mainActivity = new WeakReference<>((MainActivity) fragment.getActivity());
   }
 
   @Override
@@ -64,34 +58,33 @@ public class MainMenuTask extends AsyncTask<Void, Void, List<NavigationItem>> {
 
   @Override
   protected void onPostExecute(final List<NavigationItem> items) {
+    navDrawer = mainActivity.get().findViewById(R.id.drawer_nav_list);
     if (isAlive()) {
-      mDrawerList.setAdapter(new NavDrawerAdapter(mainActivity, items));
-      mDrawerList.setOnItemClickListener((arg0, arg1, position, arg3) -> {
-        String navigation = mFragmentWeakReference.get().getResources().getStringArray(R.array
+      navDrawer.setAdapter(new NavDrawerAdapter(mainActivity.get(), items));
+      navDrawer.setOnItemClickListener((arg0, arg1, position, arg3) -> {
+        String navigation = fragmentWeakReference.get().getResources().getStringArray(R.array
             .navigation_list_codes)[items.get(position).getArrayIndex()];
         updateNavigation(position, navigation);
       });
-      mDrawerList.justifyListViewHeightBasedOnChildren();
+      navDrawer.justifyListViewHeightBasedOnChildren();
     }
   }
 
   private void updateNavigation(int position, String navigation) {
-    if (mainActivity.updateNavigation(navigation)) {
-      mDrawerList.setItemChecked(position, true);
-      if (mDrawerCategoriesList != null) {
-        mDrawerCategoriesList.setItemChecked(0, false); // Called to force redraw
-      }
-      mainActivity.getIntent().setAction(Intent.ACTION_MAIN);
+    if (mainActivity.get().updateNavigation(navigation)) {
+      navDrawer.setItemChecked(position, true);
+      navDrawer.setItemChecked(0, false); // Called to force redraw
+      mainActivity.get().getIntent().setAction(Intent.ACTION_MAIN);
       EventBus.getDefault()
-          .post(new NavigationUpdatedEvent(mDrawerList.getItemAtPosition(position)));
+          .post(new NavigationUpdatedEvent(navDrawer.getItemAtPosition(position)));
     }
   }
 
   private boolean isAlive() {
-    return mFragmentWeakReference.get() != null
-        && mFragmentWeakReference.get().isAdded()
-        && mFragmentWeakReference.get().getActivity() != null
-        && !mFragmentWeakReference.get().getActivity().isFinishing();
+    return fragmentWeakReference.get() != null
+        && fragmentWeakReference.get().isAdded()
+        && fragmentWeakReference.get().getActivity() != null
+        && !fragmentWeakReference.get().getActivity().isFinishing();
   }
 
   private List<NavigationItem> buildMainMenu() {
@@ -99,10 +92,10 @@ public class MainMenuTask extends AsyncTask<Void, Void, List<NavigationItem>> {
       return new ArrayList<>();
     }
 
-    String[] mNavigationArray = mainActivity.getResources().getStringArray(R.array.navigation_list);
-    TypedArray mNavigationIconsArray = mainActivity.getResources()
+    String[] mNavigationArray = mainActivity.get().getResources().getStringArray(R.array.navigation_list);
+    TypedArray mNavigationIconsArray = mainActivity.get().getResources()
         .obtainTypedArray(R.array.navigation_list_icons);
-    TypedArray mNavigationIconsSelectedArray = mainActivity.getResources().obtainTypedArray(R.array
+    TypedArray mNavigationIconsSelectedArray = mainActivity.get().getResources().obtainTypedArray(R.array
         .navigation_list_icons_selected);
 
     final List<NavigationItem> items = new ArrayList<>();

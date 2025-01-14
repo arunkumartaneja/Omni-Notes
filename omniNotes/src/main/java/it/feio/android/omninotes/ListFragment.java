@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,11 @@
  */
 package it.feio.android.omninotes;
 
+import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.text.Html.fromHtml;
 import static android.text.TextUtils.isEmpty;
 import static androidx.core.view.ViewCompat.animate;
+import static it.feio.android.omninotes.helpers.BuildHelper.isDebugBuild;
 import static it.feio.android.omninotes.utils.ConstantsBase.ACTION_FAB_TAKE_PHOTO;
 import static it.feio.android.omninotes.utils.ConstantsBase.ACTION_MERGE;
 import static it.feio.android.omninotes.utils.ConstantsBase.ACTION_POSTPONE;
@@ -58,6 +60,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MenuItem.OnActionExpandListener;
 import android.view.MotionEvent;
 import android.view.SubMenu;
 import android.view.View;
@@ -66,18 +69,19 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.SearchView.OnQueryTextListener;
 import androidx.core.util.Pair;
 import androidx.core.view.GravityCompat;
-import androidx.core.view.MenuItemCompat;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.pixplicity.easyprefs.library.Prefs;
 import de.greenrobot.event.EventBus;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
@@ -86,6 +90,7 @@ import it.feio.android.omninotes.async.bus.CategoriesUpdatedEvent;
 import it.feio.android.omninotes.async.bus.NavigationUpdatedNavDrawerClosedEvent;
 import it.feio.android.omninotes.async.bus.NotesLoadedEvent;
 import it.feio.android.omninotes.async.bus.NotesMergeEvent;
+import it.feio.android.omninotes.async.bus.NotesUpdatedEvent;
 import it.feio.android.omninotes.async.bus.PasswordRemovedEvent;
 import it.feio.android.omninotes.async.notes.NoteLoaderTask;
 import it.feio.android.omninotes.async.notes.NoteProcessorArchive;
@@ -124,6 +129,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.IntStream;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
@@ -661,18 +667,15 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
     searchMenuItem = menu.findItem(R.id.menu_search);
 
     Bundle args = getArguments();
-    if (args != null) {
-      Boolean setSearchFocus = args.getBoolean("setSearchFocus");
-      if (setSearchFocus == true) {
-        searchMenuItem.expandActionView();
-        KeyboardUtils.hideKeyboard(this.getView());
-      }
+    if (args != null && args.getBoolean("setSearchFocus")) {
+      searchMenuItem.expandActionView();
+      KeyboardUtils.hideKeyboard(this.getView());
     }
 
     // Associate searchable configuration with the SearchView
     SearchManager searchManager = (SearchManager) mainActivity
         .getSystemService(Context.SEARCH_SERVICE);
-    searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.menu_search));
+    searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
     searchView.setSearchableInfo(searchManager.getSearchableInfo(mainActivity.getComponentName()));
     searchView.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
 
@@ -680,8 +683,7 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
     searchView.setOnQueryTextFocusChangeListener(
         (v, hasFocus) -> setActionItemsVisibility(menu, hasFocus));
 
-    MenuItemCompat
-        .setOnActionExpandListener(searchMenuItem, new MenuItemCompat.OnActionExpandListener() {
+    searchMenuItem.setOnActionExpandListener(new OnActionExpandListener() {
 
           boolean searchPerformed = false;
 
@@ -702,7 +704,7 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
 
           @Override
           public boolean onMenuItemActionExpand(MenuItem item) {
-
+            commitPending();
             searchView.setOnQueryTextListener(new OnQueryTextListener() {
               @Override
               public boolean onQueryTextSubmit(String arg0) {
@@ -713,10 +715,8 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
 
               @Override
               public boolean onQueryTextChange(String pattern) {
-
                 if (Prefs.getBoolean("settings_instant_search", false)
-                    && binding.searchLayout != null &&
-                    searchPerformed && mFragment.isAdded()) {
+                    && searchPerformed && mFragment.isAdded()) {
                   searchTags = null;
                   searchQuery = pattern;
                   NoteLoaderTask.getInstance().execute("getNotesByPattern", pattern);
@@ -734,15 +734,12 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
 
 
   private void setActionItemsVisibility(Menu menu, boolean searchViewHasFocus) {
-
-    boolean drawerOpen =
-        mainActivity.getDrawerLayout() != null && mainActivity.getDrawerLayout().isDrawerOpen
-            (GravityCompat.START);
+    boolean drawerOpen = mainActivity.getDrawerLayout() != null
+        && mainActivity.getDrawerLayout().isDrawerOpen(GravityCompat.START);
     boolean expandedView = Prefs.getBoolean(PREF_EXPANDED_VIEW, true);
 
     int navigation = Navigation.getNavigation();
     boolean navigationReminders = navigation == Navigation.REMINDERS;
-    boolean navigationArchive = navigation == Navigation.ARCHIVE;
     boolean navigationTrash = navigation == Navigation.TRASH;
     boolean navigationCategory = navigation == Navigation.CATEGORY;
 
@@ -767,8 +764,7 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
     menu.findItem(R.id.menu_filter_category).setVisible(!drawerOpen && !filterArchivedInCategory &&
         navigationCategory && !searchViewHasFocus);
     menu.findItem(R.id.menu_filter_category_remove)
-        .setVisible(!drawerOpen && filterArchivedInCategory &&
-            navigationCategory && !searchViewHasFocus);
+        .setVisible(!drawerOpen && filterArchivedInCategory && navigationCategory && !searchViewHasFocus);
     menu.findItem(R.id.menu_sort)
         .setVisible(!drawerOpen && !navigationReminders && !searchViewHasFocus);
     menu.findItem(R.id.menu_expanded_view)
@@ -801,7 +797,6 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
    * Performs one of the ActionBar button's actions after checked notes protection
    */
   public void performAction(MenuItem item, ActionMode actionMode) {
-
     if (isOptionsItemFastClick()) {
       return;
     }
@@ -828,6 +823,7 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
           filterCategoryArchived(false);
           break;
         case R.id.menu_uncomplete_checklists:
+          item.setVisible(false);
           filterByUncompleteChecklists();
           break;
         case R.id.menu_tags:
@@ -844,6 +840,9 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
           break;
         case R.id.menu_empty_trash:
           emptyTrash();
+          break;
+        case R.id.menu_search:
+          // Nothing to do, it's all managed by SearchView component
           break;
         default:
           LogDelegate.e("Wrong element choosen: " + item.getItemId());
@@ -907,6 +906,7 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
   private void switchNotesView() {
     boolean expandedView = Prefs.getBoolean(PREF_EXPANDED_VIEW, true);
     Prefs.edit().putBoolean(PREF_EXPANDED_VIEW, !expandedView).apply();
+    searchQueryInstant = searchQuery;
     // Change list view
     initNotesList(mainActivity.getIntent());
     // Called to switch menu voices
@@ -1186,6 +1186,16 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
     closeFab();
   }
 
+  public void onEvent(NotesUpdatedEvent notesUpdatedEvent) {
+    notesUpdatedEvent.getNotes().stream().forEach(updatedNote ->
+        IntStream.range(0, listAdapter.getNotes().size() - 1)
+            .filter(i -> listAdapter.getItem(i).get_id().equals(updatedNote.get_id()))
+            .forEach(i -> {
+              listAdapter.getNotes().set(i, updatedNote);
+              listAdapter.notifyItemChanged(i);
+            }));
+  }
+
   private void initSwipeGesture() {
     ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0,
         ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
@@ -1261,7 +1271,7 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
   }
 
   private void animateListView() {
-    if (!OmniNotes.isDebugBuild()) {
+    if (!isDebugBuild()) {
       animate(binding.progressWheel)
           .setDuration(getResources().getInteger(R.integer.list_view_fade_anim)).alpha(0);
       animate(binding.list).setDuration(getResources().getInteger(R.integer.list_view_fade_anim))
@@ -1475,12 +1485,10 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
    * Associates to or removes categories
    */
   private void categorizeNotes() {
-    // Retrieves all available categories
-    final ArrayList<Category> categories = DbHelper.getInstance().getCategories();
+    var categories = DbHelper.getInstance().getCategories();
 
-    final MaterialDialog dialog = new MaterialDialog.Builder(mainActivity)
+    var dialogBuilder = new MaterialDialog.Builder(mainActivity)
         .title(R.string.categorize_as)
-        .adapter(new CategoryRecyclerViewAdapter(mainActivity, categories), null)
         .positiveText(R.string.add_category)
         .positiveColorRes(R.color.colorPrimary)
         .negativeText(R.string.remove_category)
@@ -1490,13 +1498,21 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
           Intent intent = new Intent(mainActivity, CategoryActivity.class);
           intent.putExtra("noHome", true);
           startActivityForResult(intent, REQUEST_CODE_CATEGORY_NOTES);
-        }).onNegative((dialog12, which) -> categorizeNotesExecute(null)).build();
+        }).onNegative((dialog12, which) -> categorizeNotesExecute(null));
 
-    RecyclerViewItemClickSupport.addTo(dialog.getRecyclerView())
-        .setOnItemClickListener((recyclerView, position, v) -> {
-          dialog.dismiss();
-          categorizeNotesExecute(categories.get(position));
-        });
+    if (CollectionUtils.isNotEmpty(categories)) {
+      dialogBuilder.adapter(new CategoryRecyclerViewAdapter(mainActivity, categories), null);
+    }
+
+    final var dialog = dialogBuilder.build();
+
+    if (CollectionUtils.isNotEmpty(categories)) {
+      RecyclerViewItemClickSupport.addTo(dialog.getRecyclerView())
+          .setOnItemClickListener((recyclerView, position, v) -> {
+            dialog.dismiss();
+            categorizeNotesExecute(categories.get(position));
+          });
+    }
 
     dialog.show();
   }
@@ -1793,7 +1809,6 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
   }
 
   private void filterByTags() {
-
     final List<Tag> tags = TagsHelper.getAllTags();
 
     if (tags.isEmpty()) {
@@ -1801,33 +1816,36 @@ public class ListFragment extends BaseFragment implements OnViewTouchedListener,
       return;
     }
 
-    // Dialog and events creation
-    new MaterialDialog.Builder(mainActivity)
-        .title(R.string.select_tags)
-        .items(TagsHelper.getTagsArray(tags))
-        .positiveText(R.string.ok)
-        .itemsCallbackMultiChoice(new Integer[]{}, (dialog, which, text) -> {
-          // Retrieves selected tags
-          List<String> selectedTags = new ArrayList<>();
-          for (Integer aWhich : which) {
-            selectedTags.add(tags.get(aWhich).getText());
+    var tagsDialog = new MaterialAlertDialogBuilder(mainActivity)
+        .setTitle(R.string.select_tags)
+        .setPositiveButton(R.string.ok, (dialog, which) -> {
+          var items = ((AlertDialog) dialog).getListView().getCheckedItemPositions();
+          var selectedTags = new ArrayList<String>();
+          for(int i = 0; i < tags.size(); i++) {
+            if (items.get(i)) {
+              selectedTags.add(tags.get(i).getText());
+            }
           }
 
           // Saved here to allow persisting search
           searchTags = selectedTags.toString().substring(1, selectedTags.toString().length() - 1)
               .replace(" ", "");
-          Intent intent = mainActivity.getIntent();
 
           // Hides keyboard
           searchView.clearFocus();
           KeyboardUtils.hideKeyboard(searchView);
 
+          var intent = mainActivity.getIntent();
           intent.removeExtra(SearchManager.QUERY);
           initNotesList(intent);
-          return false;
-        }).build().show();
+        })
+        .setMultiChoiceItems(TagsHelper.getTagsArray(tags), null, (dialog, which, isChecked) ->
+            ((AlertDialog) dialog).getButton(BUTTON_POSITIVE)
+            .setEnabled(((AlertDialog) dialog).getListView().getCheckedItemCount() > 0)
+        ).create();
+    tagsDialog.show();
+    tagsDialog.getButton(BUTTON_POSITIVE).setEnabled(false);
   }
-
 
   public MenuItem getSearchMenuItem() {
     return searchMenuItem;

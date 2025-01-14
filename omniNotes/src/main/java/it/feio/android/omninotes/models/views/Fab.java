@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,6 +77,7 @@ public class Fab {
     });
     recyclerView.addOnScrollListener(
         new RecyclerView.OnScrollListener() {
+          @Override
           public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
             if (dy > 0) {
               hideFab();
@@ -99,12 +100,7 @@ public class Fab {
     }
   }
 
-  private final View.OnClickListener onClickListener = new View.OnClickListener() {
-    @Override
-    public void onClick(View v) {
-      onFabItemClickedListener.onFabItemClick(v.getId());
-    }
-  };
+  private final View.OnClickListener onClickListener = v -> onFabItemClickedListener.onFabItemClick(v.getId());
 
   public void performToggle() {
     fabExpanded = !fabExpanded;

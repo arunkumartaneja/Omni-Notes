@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ public class NoteInfosActivity extends Activity {
   }
 
   private void populateViews(Note note) {
-    StatsSingleNote infos = NotesHelper.getNoteInfos(note);
+    StatsSingleNote infos = NotesHelper.getNoteInfo(note);
 
     populateView(binding.noteInfosCategory, infos.getCategoryName());
     populateView(binding.noteInfosTags, infos.getTags());

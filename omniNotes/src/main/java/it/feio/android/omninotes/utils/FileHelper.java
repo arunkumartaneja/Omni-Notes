@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,13 +29,11 @@ import android.text.TextUtils;
 import it.feio.android.omninotes.factory.MediaStoreFactory;
 import it.feio.android.omninotes.helpers.LogDelegate;
 import java.io.File;
+import lombok.experimental.UtilityClass;
 
 
+@UtilityClass
 public class FileHelper {
-
-  private FileHelper() {
-    // hides public constructor
-  }
 
   /**
    * Get a file path from a Uri. This will get the the path for Storage Access Framework Documents,

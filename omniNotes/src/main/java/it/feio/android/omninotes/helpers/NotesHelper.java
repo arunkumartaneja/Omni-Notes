@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -128,7 +128,7 @@ public class NotesHelper {
   /**
    * Retrieves statistics data for a single note
    */
-  public static StatsSingleNote getNoteInfos(Note note) {
+  public static StatsSingleNote getNoteInfo(Note note) {
     StatsSingleNote infos = new StatsSingleNote();
 
     int words;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 package it.feio.android.omninotes.utils;
 
 import static it.feio.android.omninotes.BuildConfig.MAPS_API_KEY;
+import static it.feio.android.omninotes.helpers.GeocodeProviderBaseFactory.checkHighAccuracyLocationProvider;
 import static it.feio.android.omninotes.helpers.GeocodeProviderBaseFactory.getProvider;
 
 import android.content.Context;
@@ -30,7 +31,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.config.LocationParams;
-import io.nlopez.smartlocation.rx.ObservableFactory;
 import it.feio.android.omninotes.OmniNotes;
 import it.feio.android.omninotes.helpers.LogDelegate;
 import it.feio.android.omninotes.models.listeners.OnGeoUtilResultListener;
@@ -44,14 +44,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import rx.Observable;
-import rx.Subscriber;
 
 
 public class GeocodeHelper implements LocationListener {
@@ -67,6 +63,7 @@ public class GeocodeHelper implements LocationListener {
 
 
   @Override
+  @Deprecated
   public void onStatusChanged(String provider, int status, Bundle extras) {
     // Nothing to do
   }
@@ -89,25 +86,17 @@ public class GeocodeHelper implements LocationListener {
         .location(getProvider(OmniNotes.getAppContext()))
         .config(LocationParams.NAVIGATION).oneFix();
 
-    Observable<Location> locations = ObservableFactory.from(bod).timeout(2, TimeUnit.SECONDS);
-    locations.subscribe(new Subscriber<Location>() {
-      @Override
-      public void onNext(Location location) {
-        onGeoUtilResultListener.onLocationRetrieved(location);
-        unsubscribe();
-      }
+    var location = bod.oneFix().getLastLocation();
 
-      @Override
-      public void onCompleted() {
-        // Nothing to do
-      }
-
-      @Override
-      public void onError(Throwable e) {
+    if (location != null) {
+      onGeoUtilResultListener.onLocationRetrieved(location);
+    } else {
+      if (checkHighAccuracyLocationProvider(OmniNotes.getAppContext())) {
         onGeoUtilResultListener.onLocationUnavailable();
-        unsubscribe();
+      } else {
+        onGeoUtilResultListener.onLocationNotEnabled();
       }
-    });
+    }
   }
 
 
@@ -141,7 +130,7 @@ public class GeocodeHelper implements LocationListener {
     } else {
       SmartLocation.with(OmniNotes.getAppContext()).geocoding()
           .reverse(location, (location1, list) -> {
-            String address = list.size() > 0 ? list.get(0).getAddressLine(0) : null;
+            String address = !list.isEmpty() ? list.get(0).getAddressLine(0) : null;
             onGeoUtilResultListener.onAddressResolved(address);
           });
     }
@@ -225,9 +214,7 @@ public class GeocodeHelper implements LocationListener {
     } catch (JSONException e) {
       LogDelegate.e("Cannot process JSON results", e);
     } finally {
-      if (conn != null) {
-        conn.disconnect();
-      }
+      conn.disconnect();
       SystemHelper.closeCloseable(in);
     }
     return resultList;
@@ -235,11 +222,9 @@ public class GeocodeHelper implements LocationListener {
 
 
   public static boolean areCoordinates(String string) {
-    Pattern p = Pattern
-        .compile("^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*[-+]?(180(\\.0+)?|((1[0-7]\\d)|" +
-            "([1-9]?\\d))(\\.\\d+)?)$");
-    Matcher m = p.matcher(string);
-    return m.matches();
+    var p = Pattern.compile(
+        "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$");
+    return p.matcher(string).matches();
   }
 
   /**
@@ -247,8 +232,7 @@ public class GeocodeHelper implements LocationListener {
    * etc...
    */
   public static boolean checkLocationProviderEnabled(Context context, String provider) {
-    LocationManager locationManager = (LocationManager) context
-        .getSystemService(Context.LOCATION_SERVICE);
+    var locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     return locationManager.isProviderEnabled(provider);
   }
 

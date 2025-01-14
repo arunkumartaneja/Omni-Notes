@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,11 +25,6 @@ public class BaseFragment extends Fragment {
 
   private static final long OPTIONS_ITEM_CLICK_DELAY_TIME = 1000;
   private long mLastClickTime;
-
-  @Override
-  public void onDestroy() {
-    super.onDestroy();
-  }
 
   protected boolean isOptionsItemFastClick() {
     if (SystemClock.elapsedRealtime() - mLastClickTime < OPTIONS_ITEM_CLICK_DELAY_TIME) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ package it.feio.android.omninotes.utils;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.FlakyTest;
-import it.feio.android.omninotes.BaseAndroidTestCase;
+import it.feio.android.omninotes.testutils.BaseAndroidTestCase;
 import it.feio.android.omninotes.OmniNotes;
 import java.io.IOException;
 import org.junit.Assert;
@@ -32,11 +32,10 @@ public class GeocodeHelperTest extends BaseAndroidTestCase {
 
   @Test
   public void testGetAddressFromCoordinates() throws IOException {
-    if (ConnectionManager.internetAvailable(OmniNotes.getAppContext())) {
-      double LAT = 43.799328;
-      double LON = 11.171552;
-      String address = GeocodeHelper.getAddressFromCoordinates(OmniNotes.getAppContext(), LAT, LON);
-      Assert.assertTrue(address.length() > 0);
-    }
+    double LAT = 43.799328;
+    double LON = 11.171552;
+    String address = GeocodeHelper.getAddressFromCoordinates(OmniNotes.getAppContext(), LAT, LON);
+    Assert.assertTrue(address.length() > 0);
   }
+
 }

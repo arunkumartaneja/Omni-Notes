@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -122,31 +122,37 @@ public class Stats extends StatsSingleNote {
   }
 
 
+  @Override
   public int getTags() {
     return tags;
   }
 
 
+  @Override
   public void setTags(int tags) {
     this.tags = tags;
   }
 
 
+  @Override
   public int getWords() {
     return words;
   }
 
 
+  @Override
   public void setWords(int words) {
     this.words = words;
   }
 
 
+  @Override
   public int getChars() {
     return chars;
   }
 
 
+  @Override
   public void setChars(int chars) {
     this.chars = chars;
   }

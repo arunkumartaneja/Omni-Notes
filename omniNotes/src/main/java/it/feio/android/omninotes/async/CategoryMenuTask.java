@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 package it.feio.android.omninotes.async;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
@@ -37,7 +37,6 @@ import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 
-
 public class CategoryMenuTask extends AsyncTask<Void, Void, List<Category>> {
 
   private final WeakReference<Fragment> mFragmentWeakReference;
@@ -47,19 +46,17 @@ public class CategoryMenuTask extends AsyncTask<Void, Void, List<Category>> {
   private View settingsViewCat;
   private NonScrollableListView mDrawerList;
 
-
   public CategoryMenuTask(Fragment mFragment) {
     mFragmentWeakReference = new WeakReference<>(mFragment);
     this.mainActivity = (MainActivity) mFragment.getActivity();
   }
-
 
   @Override
   protected void onPreExecute() {
     super.onPreExecute();
     mDrawerList = mainActivity.findViewById(R.id.drawer_nav_list);
     LayoutInflater inflater = (LayoutInflater) mainActivity
-        .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
     settingsView = mainActivity.findViewById(R.id.settings_view);
 
@@ -72,9 +69,7 @@ public class CategoryMenuTask extends AsyncTask<Void, Void, List<Category>> {
     } else {
       settingsViewCat = mDrawerCategoriesList.getChildAt(mDrawerCategoriesList.getChildCount() - 1);
     }
-
   }
-
 
   @Override
   protected List<Category> doInBackground(Void... params) {
@@ -86,8 +81,8 @@ public class CategoryMenuTask extends AsyncTask<Void, Void, List<Category>> {
     }
   }
 
-
   @Override
+  @Deprecated
   protected void onPostExecute(final List<Category> categories) {
     if (isAlive()) {
       mDrawerCategoriesList.setAdapter(new CategoryBaseAdapter(mainActivity, categories,
@@ -103,13 +98,11 @@ public class CategoryMenuTask extends AsyncTask<Void, Void, List<Category>> {
     }
   }
 
-
   private void setWidgetVisibility(View view, boolean visible) {
     if (view != null) {
       view.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
   }
-
 
   private boolean isAlive() {
     return mFragmentWeakReference.get() != null
@@ -118,9 +111,7 @@ public class CategoryMenuTask extends AsyncTask<Void, Void, List<Category>> {
         && !mFragmentWeakReference.get().getActivity().isFinishing();
   }
 
-
   private List<Category> buildCategoryMenu() {
-
     List<Category> categories = DbHelper.getInstance().getCategories();
 
     View settings = categories.isEmpty() ? settingsView : settingsViewCat;
@@ -135,9 +126,7 @@ public class CategoryMenuTask extends AsyncTask<Void, Void, List<Category>> {
       });
 
       buildCategoryMenuClickEvent();
-
       buildCategoryMenuLongClickEvent();
-
     });
 
     return categories;

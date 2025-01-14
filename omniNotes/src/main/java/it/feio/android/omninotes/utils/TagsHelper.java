@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,6 @@
 
 package it.feio.android.omninotes.utils;
 
-import static rx.Observable.from;
-
 import androidx.core.util.Pair;
 import it.feio.android.omninotes.db.DbHelper;
 import it.feio.android.omninotes.models.Note;
@@ -29,9 +27,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 
 
+@UtilityClass
 public class TagsHelper {
 
 
@@ -40,7 +42,7 @@ public class TagsHelper {
   }
 
 
-  public static HashMap<String, Integer> retrieveTags(Note note) {
+  public static Map<String, Integer> retrieveTags(Note note) {
     HashMap<String, Integer> tagsMap = new HashMap<>();
     String[] words = (note.getTitle() + " " + note.getContent()).replaceAll("\n", " ").trim()
         .split(" ");
@@ -58,7 +60,7 @@ public class TagsHelper {
       Note note) {
     StringBuilder sbTags = new StringBuilder();
     List<Tag> tagsToRemove = new ArrayList<>();
-    HashMap<String, Integer> tagsMap = retrieveTags(note);
+    Map<String, Integer> tagsMap = retrieveTags(note);
 
     List<Integer> selectedTagsList = Arrays.asList(selectedTags);
     for (int i = 0; i < tags.size(); i++) {
@@ -78,7 +80,7 @@ public class TagsHelper {
     return Pair.create(sbTags.toString(), tagsToRemove);
   }
 
-  private static boolean mapContainsTag(HashMap<String, Integer> tagsMap, Tag tag) {
+  private static boolean mapContainsTag(Map<String, Integer> tagsMap, Tag tag) {
     for (String tagsMapItem : tagsMap.keySet()) {
       if (tagsMapItem.equals(tag.getText())) {
         return true;
@@ -88,20 +90,24 @@ public class TagsHelper {
   }
 
   public static String removeTags(String text, List<Tag> tagsToRemove) {
-    if (StringUtils.isEmpty(text)) {
+    if (StringUtils.isBlank(text)) {
       return text;
     }
-    String[] textCopy = new String[]{text};
-    from(tagsToRemove).forEach(tagToRemove -> textCopy[0] = removeTag(textCopy[0], tagToRemove));
-    return textCopy[0];
+    var textCopy = new AtomicReference<>(text);
+    tagsToRemove.forEach(tagToRemove -> textCopy.set(removeTag(textCopy.get(), tagToRemove)));
+    return textCopy.get();
   }
 
   private static String removeTag(String textCopy, Tag tagToRemove) {
-    return from(textCopy.split(" "))
+    var spaceProcessed = tokenizeAndRemoveTag(textCopy, " ", tagToRemove);
+    return tokenizeAndRemoveTag(spaceProcessed, "\n", tagToRemove);
+  }
+
+  private static String tokenizeAndRemoveTag(String text, String separator, Tag tagToRemove) {
+    return Arrays.stream(text.split(separator))
         .map(word -> removeTagFromWord(word, tagToRemove))
-        .reduce((s, s2) -> s + " " + s2)
-        .toBlocking()
-        .singleOrDefault("")
+        .reduce((s, s2) -> s + separator + s2)
+        .orElse("")
         .trim();
   }
 

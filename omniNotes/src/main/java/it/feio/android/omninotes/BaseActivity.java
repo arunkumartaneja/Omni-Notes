@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Typeface;
-import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.ViewConfiguration;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
@@ -44,7 +42,6 @@ import it.feio.android.omninotes.models.PasswordValidator;
 import it.feio.android.omninotes.utils.Navigation;
 import it.feio.android.omninotes.utils.PasswordHelper;
 import it.feio.android.omninotes.widget.ListWidgetProvider;
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
@@ -72,23 +69,6 @@ public class BaseActivity extends AppCompatActivity {
   }
 
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    // Forces menu overflow icon
-    try {
-      ViewConfiguration config = ViewConfiguration.get(this.getApplicationContext());
-      Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
-      if (menuKeyField != null) {
-        menuKeyField.setAccessible(true);
-        menuKeyField.setBoolean(config, false);
-      }
-    } catch (Exception e) {
-      LogDelegate.w("Just a little issue in physical menu button management", e);
-    }
-    super.onCreate(savedInstanceState);
-  }
-
-
-  @Override
   protected void onResume() {
     super.onResume();
     String navNotes = getResources().getStringArray(R.array.navigation_list_codes)[0];
@@ -96,13 +76,15 @@ public class BaseActivity extends AppCompatActivity {
     LogDelegate.d(Prefs.getAll().toString());
   }
 
+  protected void showToast(int resourceId, int duration) {
+    showToast(getResources().getString(resourceId), duration);
+  }
 
   protected void showToast(CharSequence text, int duration) {
     if (Prefs.getBoolean("settings_enable_info", true)) {
       Toast.makeText(getApplicationContext(), text, duration).show();
     }
   }
-
 
   /**
    * Method to validate security password to protect a list of notes. When "Request password on
@@ -117,7 +99,7 @@ public class BaseActivity extends AppCompatActivity {
 
     boolean askForPassword = false;
     for (Note note : notes) {
-      if (note.isLocked()) {
+      if (Boolean.TRUE.equals(note.isLocked())) {
         askForPassword = true;
         break;
       }
@@ -140,17 +122,6 @@ public class BaseActivity extends AppCompatActivity {
     navigationTmp = null;
     return true;
   }
-
-
-  /**
-   * Retrieves resource by name
-   */
-  private String getStringResourceByName(String aString) {
-    String packageName = getApplicationContext().getPackageName();
-    int resId = getResources().getIdentifier(aString, "string", packageName);
-    return getString(resId);
-  }
-
 
   /**
    * Notifies App Widgets about data changes so they can update theirselves

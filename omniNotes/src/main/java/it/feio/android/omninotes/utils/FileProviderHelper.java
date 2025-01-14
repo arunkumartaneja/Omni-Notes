@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,35 +17,42 @@
 
 package it.feio.android.omninotes.utils;
 
+import static androidx.core.content.FileProvider.getUriForFile;
+import static it.feio.android.omninotes.OmniNotes.getAppContext;
+
 import android.net.Uri;
-import androidx.core.content.FileProvider;
-import it.feio.android.omninotes.OmniNotes;
+import androidx.annotation.Nullable;
 import it.feio.android.omninotes.models.Attachment;
 import java.io.File;
+import java.io.FileNotFoundException;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
 public class FileProviderHelper {
-
-  private FileProviderHelper() {
-    // hides public constructor
-  }
 
   /**
    * Generates the FileProvider URI for a given existing file
    */
   public static Uri getFileProvider(File file) {
-    return FileProvider.getUriForFile(OmniNotes.getAppContext(),
-        OmniNotes.getAppContext().getPackageName() + ".authority", file);
+    return getUriForFile(getAppContext(), getAppContext().getPackageName() + ".authority", file);
   }
 
   /**
    * Generates a shareable URI for a given attachment by evaluating its stored (into DB) path
    */
-  public static Uri getShareableUri(Attachment attachment) {
-    File attachmentFile = new File(attachment.getUri().getPath());
-    if (attachmentFile.exists()) {
-      return FileProviderHelper.getFileProvider(attachmentFile);
-    } else {
-      return attachment.getUri();
+  public static @Nullable Uri getShareableUri(Attachment attachment) throws FileNotFoundException {
+    var uri = attachment.getUri();
+
+    if (uri.getScheme().equals("content")
+        && uri.getAuthority().equals(getAppContext().getPackageName() + ".authority")) {
+      return uri;
     }
+
+    File attachmentFile = new File(uri.getPath());
+    if (!attachmentFile.exists()) {
+      throw new FileNotFoundException("Required attachment not found in " + attachment.getUriPath());
+    }
+    return getFileProvider(attachmentFile);
   }
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,17 +18,17 @@
 package it.feio.android.omninotes.helpers;
 
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_INDEFINITE;
 import static com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_LONG;
 
-import android.app.Activity;
-import android.content.pm.PackageManager;
-import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.view.View;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import com.google.android.material.snackbar.Snackbar;
-import com.tbruyelle.rxpermissions.RxPermissions;
+import com.permissionx.guolindev.PermissionX;
 import it.feio.android.omninotes.R;
 import it.feio.android.omninotes.models.listeners.OnPermissionRequestedListener;
 import lombok.experimental.UtilityClass;
@@ -36,25 +36,23 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class PermissionsHelper {
 
-  public static void requestPermission(Activity activity, String permission,
-      int rationaleDescription, View
-      messageView, OnPermissionRequestedListener onPermissionRequestedListener) {
+  public static void requestPermission(Fragment fragment, String permission,
+      int rationaleDescription, View messageView,
+      OnPermissionRequestedListener onPermissionRequestedListener) {
 
     if (skipPermissionRequest(permission)) {
       onPermissionRequestedListener.onPermissionGranted();
       return;
     }
 
-    if (ContextCompat.checkSelfPermission(activity, permission)
-        != PackageManager.PERMISSION_GRANTED) {
-
-      if (ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)) {
+    if (ContextCompat.checkSelfPermission(fragment.getActivity(), permission) != PERMISSION_GRANTED) {
+      if (ActivityCompat.shouldShowRequestPermissionRationale(fragment.getActivity(), permission)) {
         Snackbar.make(messageView, rationaleDescription, LENGTH_INDEFINITE)
-            .setAction(R.string.ok, view -> requestPermissionExecute(activity, permission,
+            .setAction(R.string.ok, view -> requestPermissionExecute(fragment, permission,
                 onPermissionRequestedListener, messageView))
             .show();
       } else {
-        requestPermissionExecute(activity, permission, onPermissionRequestedListener, messageView);
+        requestPermissionExecute(fragment, permission, onPermissionRequestedListener, messageView);
       }
     } else {
       if (onPermissionRequestedListener != null) {
@@ -64,18 +62,18 @@ public class PermissionsHelper {
   }
 
   private static boolean skipPermissionRequest(String permission) {
-    return Build.VERSION.SDK_INT > Build.VERSION_CODES.Q && permission.equals(WRITE_EXTERNAL_STORAGE);
+    return BuildHelper.isAbove(VERSION_CODES.Q) && permission.equals(WRITE_EXTERNAL_STORAGE);
   }
 
-  private static void requestPermissionExecute(Activity activity, String permission,
+  private static void requestPermissionExecute(Fragment fragment, String permission,
       OnPermissionRequestedListener onPermissionRequestedListener, View messageView) {
-    RxPermissions.getInstance(activity)
-        .request(permission)
-        .subscribe(granted -> {
-          if (granted && onPermissionRequestedListener != null) {
+    PermissionX.init(fragment)
+        .permissions(permission)
+        .request((allGranted, grantedList, deniedList) -> {
+          if (allGranted) {
             onPermissionRequestedListener.onPermissionGranted();
           } else {
-            String msg = activity.getString(R.string.permission_not_granted) + ": " + permission;
+            var msg = fragment.getString(R.string.permission_not_granted) + ": " + permission;
             Snackbar.make(messageView, msg, LENGTH_LONG).show();
           }
         });

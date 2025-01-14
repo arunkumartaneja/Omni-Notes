@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 package it.feio.android.omninotes.helpers.count;
 
 import it.feio.android.omninotes.models.Note;
-import rx.Observable;
+import java.util.Arrays;
 
 public class IdeogramsWordCounter implements WordCounter {
 
@@ -30,9 +30,10 @@ public class IdeogramsWordCounter implements WordCounter {
   @Override
   public int countChars(Note note) {
     String titleAndContent = note.getTitle() + "\n" + note.getContent();
-    return Observable
-        .from(sanitizeTextForWordsAndCharsCount(note, titleAndContent).split(""))
-        .filter(s -> !s.matches("\\s"))
-        .count().toBlocking().single();
+    return Math.toIntExact(
+        Arrays.stream(sanitizeTextForWordsAndCharsCount(note, titleAndContent).split(""))
+            .filter(s -> !s.matches("\\s"))
+            .count());
   }
+
 }

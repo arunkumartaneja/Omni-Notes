@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2020 Federico Iosue (federico@iosue.it)
+ * Copyright (C) 2013-2024 Federico Iosue (federico@iosue.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,11 +17,15 @@
 
 package it.feio.android.omninotes.helpers;
 
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
+import static android.app.PendingIntent.FLAG_MUTABLE;
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static it.feio.android.omninotes.utils.ConstantsBase.INTENT_NOTE;
 
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import it.feio.android.omninotes.models.Note;
@@ -51,7 +55,23 @@ public class IntentHelper {
       Note note) {
     Intent intent = getNoteIntent(context, target, action, note);
     return PendingIntent.getActivity(context, getUniqueRequestCode(note), intent,
-        PendingIntent.FLAG_UPDATE_CURRENT);
+        immutablePendingIntentFlag(FLAG_UPDATE_CURRENT));
+  }
+
+  public static int immutablePendingIntentFlag(final int flag) {
+    int pIntentFlags = flag;
+    if (BuildHelper.isAboveOrEqual(VERSION_CODES.M)) {
+      pIntentFlags = pIntentFlags | FLAG_IMMUTABLE;
+    }
+    return pIntentFlags;
+  }
+
+  public static int mutablePendingIntentFlag(final int flag) {
+    int pIntentFlags = flag;
+    if (BuildHelper.isAboveOrEqual(VERSION_CODES.S)) {
+      pIntentFlags = pIntentFlags | FLAG_MUTABLE;
+    }
+    return pIntentFlags;
   }
 
   static int getUniqueRequestCode(Note note) {
